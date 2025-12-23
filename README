@@ -1,0 +1,41 @@
+0. Use the Task tool, the skills, and the enterprise systems architect
+0. CLI Toolkit: /Users/ryan/development/adsops-utils
+1. Operations tools for engineers and staff
+  1a. Access to Create,View,List,Edit,Open,Close tickets in the ticketing system
+at ~/development/afterdarksys.com/subdomains/changes
+  1b. mkdir changes
+  1c. Need a change management tool that ties into After Dark Systems Central Auth
+  1d. Support After Dark Systems Central Auth Login
+  1e. Support Oauth2 and Passkeys
+  1f. Support Google Auth
+  1g. changes.afterdarksys.com
+2. Select industry:
+  2a. Healthcare
+  2b. IT
+  2c. Government
+  2d. Insurance
+  2e. Finance
+3. Regulatory Compliance Model
+   3a. GLBA
+   3b. SOX
+   3c. HIPPA
+   3e. Banking Secrecy Act
+   3f. GDPR
+   3g. Other, please specify
+4. Box to specify.
+5. Approval workflow -> e-mails approvers
+   5a. approvers get approval link
+   5b. can approve,deny,request update
+6. Can Support multiple approvals
+  6a. Operations Approval
+  6b. IT Approval
+  6c. Risk Approval
+  6d. Change Management Board Approval
+  6e. AI Ops Approval
+  6f. Security Approval
+  6g. Network Engineering Approval
+  6h. Cloud Approval
+7. Submit,reset,save
+8. All work requests are saved forever
+  8a. work requests cannot be deleted
+

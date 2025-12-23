@@ -1,0 +1,60 @@
+# After Dark Systems Change Management - Configuration File
+# Copy this file to config.yaml and update values
+
+environment: development
+port: "8080"
+log_level: debug
+
+database:
+  host: localhost
+  port: 5432
+  user: adsops
+  password: your_secure_password
+  dbname: adsops_changes
+  sslmode: disable
+  max_open_conns: 25
+  max_idle_conns: 5
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+
+jwt:
+  secret_key: your_secure_jwt_secret_key_min_32_chars
+  access_token_duration: 15  # minutes
+  refresh_token_duration: 7  # days
+  issuer: changes.afterdarksys.com
+
+oauth2:
+  afterdark:
+    client_id: your_client_id
+    client_secret: your_client_secret
+    redirect_url: https://changes.afterdarksys.com/auth/callback/afterdark
+    auth_url: https://auth.afterdarksys.com/oauth2/authorize
+    token_url: https://auth.afterdarksys.com/oauth2/token
+    userinfo_url: https://auth.afterdarksys.com/oauth2/userinfo
+    scopes: openid,profile,email
+
+  google:
+    client_id: your_google_client_id
+    client_secret: your_google_client_secret
+    redirect_url: https://changes.afterdarksys.com/auth/callback/google
+    auth_url: https://accounts.google.com/o/oauth2/v2/auth
+    token_url: https://oauth2.googleapis.com/token
+    userinfo_url: https://openidconnect.googleapis.com/v1/userinfo
+    scopes: openid,profile,email
+
+aws:
+  region: us-east-1
+  access_key_id: ""
+  secret_access_key: ""
+  s3_bucket: adsops-changes-attachments
+  sqs_queue_url: https://sqs.us-east-1.amazonaws.com/123456789/adsops-notifications
+
+email:
+  from: noreply@changes.afterdarksys.com
+  reply_to: support@afterdarksys.com
+  base_url: https://changes.afterdarksys.com
+  company_name: After Dark Systems

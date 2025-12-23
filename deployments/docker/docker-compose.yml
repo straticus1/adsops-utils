@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: adsops-postgres
+    environment:
+      POSTGRES_USER: adsops
+      POSTGRES_PASSWORD: adsops_dev_password
+      POSTGRES_DB: adsops_changes
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adsops -d adsops_changes"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: adsops-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Server
+  api:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.api
+    container_name: adsops-api
+    environment:
+      ADSOPS_ENVIRONMENT: development
+      ADSOPS_PORT: 8080
+      ADSOPS_LOG_LEVEL: debug
+      ADSOPS_DATABASE_HOST: postgres
+      ADSOPS_DATABASE_PORT: 5432
+      ADSOPS_DATABASE_USER: adsops
+      ADSOPS_DATABASE_PASSWORD: adsops_dev_password
+      ADSOPS_DATABASE_DBNAME: adsops_changes
+      ADSOPS_DATABASE_SSLMODE: disable
+      ADSOPS_REDIS_HOST: redis
+      ADSOPS_REDIS_PORT: 6379
+      ADSOPS_JWT_SECRET_KEY: development_secret_key_change_in_production
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Background Worker
+  worker:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.worker
+    container_name: adsops-worker
+    environment:
+      ADSOPS_ENVIRONMENT: development
+      ADSOPS_DATABASE_HOST: postgres
+      ADSOPS_DATABASE_PORT: 5432
+      ADSOPS_DATABASE_USER: adsops
+      ADSOPS_DATABASE_PASSWORD: adsops_dev_password
+      ADSOPS_DATABASE_DBNAME: adsops_changes
+      ADSOPS_DATABASE_SSLMODE: disable
+      ADSOPS_REDIS_HOST: redis
+      ADSOPS_REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: adsops-network
