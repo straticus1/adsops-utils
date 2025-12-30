@@ -1,0 +1,41 @@
+{
+  "id": "CHG-2025-00018",
+  "title": "Traffic Bootstrap Campaign - SEO Content (cats.center)",
+  "description": "Create SEO-optimized content for cats.center to drive organic search traffic.\n\n## Target Keywords\n1. \"best cat breeds for apartments\" - Article 1\n2. \"why is my cat not eating\" - Article 2\n3. \"how to introduce cats to each other\" - Article 3\n\n## Content Requirements\n- 1500+ words per article\n- Keyword in title, H1, first paragraph\n- 3-5 subheadings with related keywords\n- Internal links to other cats.center pages\n- Meta descriptions written\n- Vet-reviewed or cited sources for health content\n\n## Expected Results (3-6 months)\n- Ranking on page 1 for target keywords\n- 100-500 organic visitors per month per article\n- Compounding traffic growth",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "low",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center"
+  ],
+  "acceptance_criteria": [
+    "Article 1 published: best cat breeds for apartments",
+    "Article 2 published: why is my cat not eating",
+    "Article 3 published: how to introduce cats to each other",
+    "All articles indexed by Google",
+    "Meta descriptions set for all articles",
+    "Internal linking implemented"
+  ],
+  "testing_plan": "1. Google Search Console - verify indexing\n2. Week 2: Check initial impressions\n3. Month 1: Check ranking positions\n4. Month 3: Review organic traffic attribution",
+  "rollback_plan": "N/A - content can be updated if needed",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "marketing"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. SEO is long-term play - start immediately for compounding returns."
+    }
+  ]
+}

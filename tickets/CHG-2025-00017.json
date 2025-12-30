@@ -1,0 +1,41 @@
+{
+  "id": "CHG-2025-00017",
+  "title": "Traffic Bootstrap Campaign - Product Hunt Launch (cats.center)",
+  "description": "Launch cats.center on Product Hunt for traffic and community exposure.\n\n## Launch Details\n- **Day**: Tuesday (optimal launch day)\n- **Time**: 12:01 AM PT\n- **Hunter**: Internal or find established hunter\n\n## Required Assets\n- Tagline (60 chars max)\n- Description (240 chars)\n- 4-5 screenshots or images\n- Maker intro comment\n- First comment strategy\n\n## Expected Results\n- Top 10 finish: 500-2,000 visitors\n- Top 5 finish: 2,000-5,000 visitors\n- Homepage: 5,000-15,000 visitors\n\n## Community Rally\n- Notify existing users/supporters\n- Post on social when live\n- Respond to ALL comments within 1 hour",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "low",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center"
+  ],
+  "acceptance_criteria": [
+    "Product Hunt maker profile complete",
+    "Product listing created with all assets",
+    "Launch scheduled for Tuesday 12:01 AM PT",
+    "Community notified for launch support",
+    "All Product Hunt comments responded to",
+    "Traffic spike tracked in analytics"
+  ],
+  "testing_plan": "1. Preview listing before launch\n2. Test all links in listing\n3. Monitor real-time traffic during launch\n4. Track signups during 24-hour launch window",
+  "rollback_plan": "N/A - cannot unpublish after launch",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "marketing"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00011"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. Schedule for Week 2 after initial organic launch proves traction."
+    }
+  ]
+}

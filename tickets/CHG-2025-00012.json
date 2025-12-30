@@ -1,0 +1,37 @@
+{
+  "id": "CHG-2025-00012",
+  "title": "INCIDENT: support.afterdarksys.com Unreachable",
+  "description": "Support portal is timing out (ECONNABORTED after 30s). DNS resolves to 132.226.54.153 which appears to be the legacy OCI server.\n\nImpact: Users cannot access support portal.\nPriority: High - customer-facing service.",
+  "status": "in_progress",
+  "priority": "urgent",
+  "risk": "high",
+  "type": "incident",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "support.afterdarksys.com",
+    "132.226.54.153"
+  ],
+  "acceptance_criteria": [
+    "support.afterdarksys.com responds with 200 OK",
+    "SSL certificate is valid",
+    "Page loads within 5 seconds"
+  ],
+  "testing_plan": "curl -sI https://support.afterdarksys.com",
+  "rollback_plan": "Repoint DNS to working K3s cluster at 129.80.158.147",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T11:07:00Z",
+  "updated_at": "2025-12-28T11:07:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": ["operations"],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T11:07:00Z",
+      "text": "Incident detected during validation run. Server at 132.226.54.153 is not responding on HTTPS. Other domains on same IP also have SSL issues (DEPTH_ZERO_SELF_SIGNED_CERT)."
+    }
+  ]
+}

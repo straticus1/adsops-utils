@@ -1,0 +1,38 @@
+{
+  "id": "CHG-2025-00037",
+  "title": "SECURITY-007: Session Fixation Vulnerability",
+  "description": "Session ID is not regenerated after successful authentication, allowing session fixation attacks where an attacker can hijack a user's session.\n\n---\n**Synced from Markdown Ticket**\nOriginal ID: SECURITY-007\nSource: /Users/ryan/development/buildnft.xyz/docs/tickets/SECURITY-007-session-fixation.md\nOriginal Assignee: ** Backend Developer",
+  "status": "submitted",
+  "priority": "urgent",
+  "risk": "high",
+  "type": "security",
+  "industry": "",
+  "compliance_frameworks": [
+    "banking_secrecy_act",
+    "sox"
+  ],
+  "affected_systems": [
+    "authentication",
+    "frontend",
+    "backend",
+    "security"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-30T10:02:10Z",
+  "updated_at": "2025-12-30T10:02:10Z",
+  "sprint": "2025-Q4-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-30T10:02:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

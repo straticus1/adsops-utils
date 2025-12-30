@@ -1,0 +1,41 @@
+{
+  "id": "CHG-2025-00019",
+  "title": "Traffic Bootstrap Campaign - Week 1 Metrics Review",
+  "description": "Review all Week 1 campaign metrics and optimize for Week 2.\n\n## Review Areas\n1. **Organic Performance**\n   - Hacker News: Traffic, signups, engagement\n   - Reddit: Upvotes, comments, traffic, signups\n   - Twitter: Impressions, clicks, signups\n\n2. **Paid Performance**\n   - Facebook (cats.center): CTR, CPC, CAC, signups\n   - LinkedIn (dnsscience): CTR, CPC, CAC, signups\n   - LinkedIn (veribits): CTR, CPC, CAC, signups\n\n3. **Overall Metrics**\n   - Total spend vs budget\n   - Total signups by property\n   - CAC by channel\n   - Best/worst performers\n\n## Optimization Actions\n- Pause ads with CTR < 0.5%\n- Increase budget on ads with CAC below target\n- Adjust targeting based on performance data",
+  "status": "pending",
+  "priority": "high",
+  "risk": "low",
+  "type": "review",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center",
+    "dnsscience.io",
+    "veribits.com"
+  ],
+  "acceptance_criteria": [
+    "Traffic data pulled from all sources",
+    "CAC calculated per channel",
+    "Top performing ads identified",
+    "Underperforming ads paused",
+    "Budget reallocated to winners",
+    "Week 1 report documented"
+  ],
+  "testing_plan": "N/A - review ticket",
+  "rollback_plan": "N/A - review ticket",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00011", "CHG-2025-00012", "CHG-2025-00013", "CHG-2025-00014", "CHG-2025-00015"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. Due: End of Week 1 (Jan 3, 2026)."
+    }
+  ]
+}

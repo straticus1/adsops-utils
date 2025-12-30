@@ -1,0 +1,45 @@
+{
+  "id": "CHG-2025-00016",
+  "title": "Traffic Bootstrap Campaign - Analytics & Tracking Setup",
+  "description": "Verify and configure analytics tracking on all campaign properties before launching paid ads.\n\n## Properties\n- cats.center\n- dnsscience.io\n- veribits.com\n\n## Required Tracking\n1. **Analytics Platform** - Google Analytics or analytics.afterdarksys.com\n2. **Facebook Pixel** - For cats.center retargeting\n3. **LinkedIn Insight Tag** - For B2B properties\n4. **Conversion Events** - Signup, trial start, etc.\n5. **UTM Parameters** - Proper attribution\n\n## UTM Structure\n```\n?utm_source=[platform]&utm_medium=[paid|organic]&utm_campaign=[campaign_name]\n```\n\nThis is a BLOCKER for paid ad tickets.",
+  "status": "pending",
+  "priority": "high",
+  "risk": "low",
+  "type": "enhancement",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center",
+    "dnsscience.io",
+    "veribits.com",
+    "analytics.afterdarksys.com"
+  ],
+  "acceptance_criteria": [
+    "Analytics receiving data on cats.center",
+    "Analytics receiving data on dnsscience.io",
+    "Analytics receiving data on veribits.com",
+    "Facebook Pixel verified on cats.center",
+    "LinkedIn Insight Tag verified on B2B sites",
+    "Signup conversion events firing correctly",
+    "UTM parameters parsing correctly"
+  ],
+  "testing_plan": "1. Visit each site, verify analytics event in real-time\n2. Test signup flow, verify conversion event\n3. Test UTM parameter persistence through signup\n4. Verify Facebook Pixel Helper shows active pixel",
+  "rollback_plan": "N/A - tracking setup",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "it"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. This blocks all paid ad tickets - must be completed first to ensure proper attribution."
+    }
+  ]
+}

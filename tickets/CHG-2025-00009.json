@@ -1,0 +1,44 @@
+{
+  "id": "CHG-2025-00009",
+  "title": "Build merklemart.com - Crypto Marketplace",
+  "description": "Create merklemart.com as a blockchain-powered marketplace.\n\n## Features\n1. **Product Listings** - List physical and digital products\n2. **Crypto Payments** - Accept BTC, ETH, USDC, etc.\n3. **Escrow System** - Secure transactions with smart contracts\n4. **Seller Dashboard** - Inventory, orders, analytics\n5. **Buyer Protection** - Dispute resolution system\n6. **NFT Integration** - Sell NFTs alongside physical goods\n7. **Merkle Proofs** - Verification system for authenticity\n\n## Tech Stack\n- Next.js frontend\n- Node.js/Go backend\n- PostgreSQL + Redis\n- Web3 integration\n- IPFS for decentralized storage\n\n## Target Domain\n- merklemart.com\n\n## Related\n- buildnft.xyz (NFT platform)\n- digitaltokens.xyz (token platform)\n- managedcrypto.com (crypto services)",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "medium",
+  "type": "new_feature",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "merklemart.com",
+    "ecosystem.zone"
+  ],
+  "acceptance_criteria": [
+    "merklemart.com deployed and accessible",
+    "Product listing and browsing working",
+    "Crypto payment integration functional",
+    "Seller registration and dashboard working",
+    "Basic escrow system implemented",
+    "NFT listing support added",
+    "Added to ecosystem.zone directory"
+  ],
+  "testing_plan": "1. Test product listing flow\n2. Test crypto payment flow (testnet)\n3. Test seller onboarding\n4. Test buyer purchase flow\n5. Test escrow release\n6. Verify NFT integration",
+  "rollback_plan": "Remove DNS records and k8s deployment if issues occur. Use testnet for all crypto transactions during testing.",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-27T16:00:00Z",
+  "updated_at": "2025-12-27T16:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations",
+    "it"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-27T16:00:00Z",
+      "text": "Ticket created. Building crypto marketplace with escrow and NFT support. Medium risk due to financial transactions."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "CHG-2025-00006",
+  "title": "Build meows.live - Live Cat Streaming Platform",
+  "description": "Rebrand and adapt sexyca.ms codebase to create meows.live - a live cat streaming platform.\n\n## Source Codebase\n- `/Users/ryan/development/sexyca.ms`\n- Laravel backend + Next.js frontend\n- PostgreSQL database\n- Features: Live streaming, chat, operators (cat owners), favorites, messaging\n\n## Rebranding Tasks\n1. Update all branding (logos, colors, copy)\n2. Rename 'operators' to 'cat streamers' or 'cat parents'\n3. Rename 'customers' to 'viewers' or 'cat lovers'\n4. Remove adult-oriented features\n5. Add cat-specific features (breed tags, cat profiles)\n6. Update domain references throughout codebase\n\n## Target Domain\n- meows.live\n\n## Related\n- cats.center (resource hub) - separate but linked site",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "low",
+  "type": "new_feature",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "meows.live",
+    "ecosystem.zone"
+  ],
+  "acceptance_criteria": [
+    "meows.live deployed and accessible",
+    "All sexyca.ms branding removed",
+    "Cat streaming functionality working",
+    "User registration and login functional",
+    "Chat and messaging working",
+    "Added to ecosystem.zone directory"
+  ],
+  "testing_plan": "1. Verify all pages load without adult content references\n2. Test user registration flow\n3. Test streamer registration flow\n4. Test live streaming functionality\n5. Test chat and messaging\n6. Verify mobile responsiveness",
+  "rollback_plan": "Remove DNS records and k8s deployment if issues occur",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-27T16:00:00Z",
+  "updated_at": "2025-12-27T16:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-27T16:00:00Z",
+      "text": "Ticket created. Reusing sexyca.ms infrastructure for cat streaming platform. Full rebrand required."
+    }
+  ]
+}

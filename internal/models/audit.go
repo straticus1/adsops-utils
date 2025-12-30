@@ -87,36 +87,6 @@ type CreateAuditLogInput struct {
 	ComplianceFrameworks []ComplianceFramework
 }
 
-// AuditLogFilter represents filter options for querying audit logs
-type AuditLogFilter struct {
-	UserID               *uuid.UUID            `json:"user_id,omitempty"`
-	Action               []string              `json:"action,omitempty"`
-	ResourceType         []string              `json:"resource_type,omitempty"`
-	ResourceID           *uuid.UUID            `json:"resource_id,omitempty"`
-	ComplianceRelevant   *bool                 `json:"compliance_relevant,omitempty"`
-	ComplianceFrameworks []ComplianceFramework `json:"compliance_frameworks,omitempty"`
-	FromDate             *time.Time            `json:"from_date,omitempty"`
-	ToDate               *time.Time            `json:"to_date,omitempty"`
-	Search               string                `json:"search,omitempty"`
-	Page                 int                   `json:"page" validate:"min=1"`
-	PerPage              int                   `json:"per_page" validate:"min=1,max=1000"`
-}
-
-// SetDefaults sets default values for the filter
-func (f *AuditLogFilter) SetDefaults() {
-	if f.Page < 1 {
-		f.Page = 1
-	}
-	if f.PerPage < 1 || f.PerPage > 1000 {
-		f.PerPage = 100
-	}
-}
-
-// Offset returns the offset for pagination
-func (f *AuditLogFilter) Offset() int {
-	return (f.Page - 1) * f.PerPage
-}
-
 // NotificationQueue represents a pending notification
 type NotificationQueue struct {
 	ID               uuid.UUID  `db:"id" json:"id"`

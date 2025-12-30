@@ -1,0 +1,44 @@
+{
+  "id": "CHG-2025-00011",
+  "title": "Traffic Bootstrap Campaign - Hacker News & Reddit Launch",
+  "description": "Launch organic traffic acquisition for ecosystem.zone properties via Hacker News and Reddit.\n\n## Properties\n- **dnsscience.io** - Target: DevOps, SRE, IT Admins\n- **cats.center** - Target: Cat owners\n\n## Channels\n1. **Hacker News** - Show HN post for dnsscience.io\n2. **Reddit** - r/sysadmin, r/devops for dnsscience.io\n3. **Reddit** - r/cats for cats.center\n\n## Copy Assets\nSee /tmp/traffic_bootstrap for full copy.\n\n## Expected Results (48 hours)\n- Hacker News (if front page): 500-5,000 visitors\n- Reddit organic: 100-500 visitors\n\n## Related\n- Campaign Plan: /tmp/traffic_bootstrap\n- Budget: $0 (organic only)",
+  "status": "pending",
+  "priority": "high",
+  "risk": "low",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "dnsscience.io",
+    "cats.center",
+    "ecosystem.zone"
+  ],
+  "acceptance_criteria": [
+    "Hacker News Show HN post submitted for dnsscience.io",
+    "Follow-up comment posted within 5 minutes of HN submission",
+    "Reddit post submitted to r/sysadmin",
+    "Reddit post submitted to r/devops",
+    "Reddit post submitted to r/cats",
+    "All comments responded to within 2 hours",
+    "Traffic tracked via analytics"
+  ],
+  "testing_plan": "1. Verify all posts are live and not removed by mods\n2. Check analytics for referral traffic from each source\n3. Track signups attributed to each channel via UTM parameters",
+  "rollback_plan": "Delete posts if receiving negative community response",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "marketing"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. This is the $0 CAC organic launch phase - should be executed ASAP before paid ads."
+    }
+  ]
+}

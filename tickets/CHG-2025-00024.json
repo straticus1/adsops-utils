@@ -1,0 +1,30 @@
+{
+  "id": "CHG-2025-00024",
+  "title": "meows.live DNS and Infrastructure Setup",
+  "description": "",
+  "status": "draft",
+  "priority": "medium",
+  "risk": "medium",
+  "type": "",
+  "industry": "",
+  "compliance_frameworks": [],
+  "affected_systems": [],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-28T23:40:46Z",
+  "updated_at": "2025-12-28T23:40:46Z",
+  "sprint": "2025-Q4-Sprint-2",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-28T23:40:46Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

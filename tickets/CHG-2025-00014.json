@@ -1,0 +1,43 @@
+{
+  "id": "CHG-2025-00014",
+  "title": "Traffic Bootstrap Campaign - LinkedIn Ads Setup (dnsscience.io)",
+  "description": "Set up and launch LinkedIn paid advertising campaign for dnsscience.io targeting DevOps and Security professionals.\n\n## Budget\n- Total: $300\n- Daily: $20/day\n- Duration: 15 days\n\n## Ad Sets\n1. **Visibility Play** - \"Your DNS Is a Black Box. We Fix That.\"\n2. **Security Angle** - \"DNS Attacks Start With Queries You Can't See\"\n\n## Targeting\n- Job Titles: DevOps Engineer, SRE, IT Admin, Network Engineer, Security Engineer, CISO\n- Company Size: 50-5000 employees\n- Skills: DNS, Kubernetes, AWS, Cloud Infrastructure, Terraform\n\n## Success Metrics\n- Target CAC: < $8\n- Target signups: 40+\n- Target CTR: > 0.3%",
+  "status": "pending",
+  "priority": "high",
+  "risk": "medium",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "dnsscience.io"
+  ],
+  "acceptance_criteria": [
+    "LinkedIn Campaign Manager account active",
+    "Payment method configured",
+    "LinkedIn Insight Tag installed on dnsscience.io",
+    "2 ad campaigns created with proper targeting",
+    "Daily budget set to $20",
+    "Ads approved and running",
+    "UTM parameters on all links"
+  ],
+  "testing_plan": "1. Verify Insight Tag firing\n2. Confirm ads approved\n3. Day 3 review: CTR > 0.2%, adjust targeting if needed\n4. Week 1 review: Calculate CAC, scale or pause",
+  "rollback_plan": "Pause campaign if CAC exceeds $20 after 7 days",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "marketing",
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00016"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. $300 of $1,000 budget for dnsscience.io LinkedIn ads."
+    }
+  ]
+}

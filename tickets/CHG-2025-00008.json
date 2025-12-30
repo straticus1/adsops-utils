@@ -1,0 +1,44 @@
+{
+  "id": "CHG-2025-00008",
+  "title": "Build digitaltokens.xyz - Token Launchpad Platform",
+  "description": "Create digitaltokens.xyz as a token launchpad and digital asset platform.\n\n## Features\n1. **Token Launchpad** - Create and launch custom tokens\n2. **Loyalty Points System** - Business loyalty program tokens\n3. **Gift Cards** - Digital gift card creation and redemption\n4. **Token Management** - Dashboard for token holders\n5. **Marketplace** - Buy/sell/trade tokens\n6. **API Access** - Developer API for integrations\n\n## Tech Stack\n- Next.js frontend\n- Node.js/Go backend\n- PostgreSQL + Redis\n- Web3 integration (ethers.js)\n- Stripe for fiat payments\n\n## Target Domain\n- digitaltokens.xyz\n\n## Related\n- buildnft.xyz (existing NFT platform)\n- merklemart.com (crypto marketplace)\n- getthis.money (payments platform)",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "medium",
+  "type": "new_feature",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "digitaltokens.xyz",
+    "ecosystem.zone"
+  ],
+  "acceptance_criteria": [
+    "digitaltokens.xyz deployed and accessible",
+    "Token creation wizard functional",
+    "Loyalty points system working",
+    "Gift card creation and redemption working",
+    "User dashboard functional",
+    "API documentation published",
+    "Added to ecosystem.zone directory"
+  ],
+  "testing_plan": "1. Test token creation flow\n2. Test loyalty points issuance and redemption\n3. Test gift card lifecycle\n4. Test user authentication\n5. Test API endpoints\n6. Verify blockchain integrations",
+  "rollback_plan": "Remove DNS records and k8s deployment if issues occur. No blockchain transactions until production-ready.",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-27T16:00:00Z",
+  "updated_at": "2025-12-27T16:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations",
+    "it"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-27T16:00:00Z",
+      "text": "Ticket created. Building token launchpad with loyalty points and gift card features. Medium risk due to financial nature."
+    }
+  ]
+}

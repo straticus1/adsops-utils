@@ -1,0 +1,43 @@
+{
+  "id": "CHG-2025-00013",
+  "title": "Traffic Bootstrap Campaign - Facebook Ads Setup (cats.center)",
+  "description": "Set up and launch Facebook/Instagram paid advertising campaign for cats.center.\n\n## Budget\n- Total: $400\n- Daily: $20/day\n- Duration: 20 days\n\n## Ad Sets\n1. **New Cat Owner** - Target: Recent pet adopters, 22-45\n2. **Cat Health Concern** - Target: Cat health interests\n3. **Breed Research** - Target: Cat breeds, pet adoption interests\n\n## Creative Assets Required\n- 3 images (cute cats, curious cats, multiple breeds)\n- Headlines and copy per ad set (see /tmp/traffic_bootstrap)\n\n## Targeting\n- Age: 22-50\n- Interests: Cats, Cat food brands, Pet adoption, Kittens\n- Exclude: Pet industry employees\n\n## Success Metrics\n- Target CAC: < $0.80\n- Target signups: 500+\n- Target CTR: > 1%",
+  "status": "pending",
+  "priority": "high",
+  "risk": "medium",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center"
+  ],
+  "acceptance_criteria": [
+    "Facebook Business Manager account active",
+    "Payment method configured",
+    "Facebook Pixel installed on cats.center",
+    "3 ad sets created with proper targeting",
+    "Daily budget set to $20",
+    "Ads approved and running",
+    "UTM parameters on all links"
+  ],
+  "testing_plan": "1. Verify Pixel firing on cats.center\n2. Confirm ads approved (no policy violations)\n3. Check first 24 hours: CTR > 0.5%, CPC < $1\n4. Day 3 review: Pause underperformers, scale winners",
+  "rollback_plan": "Pause campaign if CAC exceeds $2 after 72 hours",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "marketing",
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00016"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. $400 of $1,000 total budget allocated to cats.center Facebook ads."
+    }
+  ]
+}

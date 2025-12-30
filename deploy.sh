@@ -31,7 +31,7 @@ MODE="${1:-help}"
 case "$MODE" in
   build)
     echo -e "${YELLOW}Building Docker image...${NC}"
-    docker build -t ${SERVICE_NAME}:latest -t ${SERVICE_NAME}:${IMAGE_TAG} -f deployments/docker/Dockerfile.api .
+    docker build --platform linux/amd64 -t ${SERVICE_NAME}:latest -t ${SERVICE_NAME}:${IMAGE_TAG} -f deployments/docker/Dockerfile.api .
     echo -e "${GREEN}Build complete: ${SERVICE_NAME}:${IMAGE_TAG}${NC}"
     ;;
 
@@ -49,7 +49,7 @@ case "$MODE" in
 
     # Build
     echo -e "${BLUE}Step 1: Building Docker image...${NC}"
-    docker build -t ${SERVICE_NAME}:latest -t ${SERVICE_NAME}:${IMAGE_TAG} -f deployments/docker/Dockerfile.api .
+    docker build --platform linux/amd64 -t ${SERVICE_NAME}:latest -t ${SERVICE_NAME}:${IMAGE_TAG} -f deployments/docker/Dockerfile.api .
 
     # Tag
     echo -e "${BLUE}Step 2: Tagging for OCIR...${NC}"

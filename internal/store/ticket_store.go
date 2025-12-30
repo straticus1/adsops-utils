@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"github.com/adsops-utils/internal/models"
+	"github.com/afterdarksys/adsops-utils/internal/models"
 )
 
 // TicketStore handles ticket database operations

@@ -1,0 +1,45 @@
+{
+  "id": "CHG-2025-00010",
+  "title": "Build letsconnect.love - Dating Platform (NerdyCupid API)",
+  "description": "Create letsconnect.love as a dating/connection platform powered by the NerdyCupid.ai Scientific Matching API.\n\n## Features\n1. **Scientific Matching** - Powered by NerdyCupid.ai API\n   - Big Five Personality matching\n   - Lifestyle compatibility\n   - Intimate compatibility\n   - Financial compatibility\n   - Values and interests alignment\n2. **User Profiles** - Photos, bio, preferences\n3. **AI Insights** - Compatibility explanations, conversation starters\n4. **Messaging** - In-app messaging for matches\n5. **Discovery** - Browse and filter potential matches\n6. **Premium Features** - Advanced filters, unlimited likes, AI analysis\n\n## Tech Stack\n- Next.js frontend\n- NerdyCupid.ai API (https://api.nerdycupid.ai/api/v2)\n- PostgreSQL for user data\n- Stripe for subscriptions\n\n## API Integration\n- POST /api/v2/match - Calculate compatibility\n- POST /api/v2/match/find - Find matches\n- POST /api/v2/profiles - Create profiles\n- POST /api/v2/match/analyze - Deep AI analysis\n\n## Target Domain\n- letsconnect.love\n\n## Related\n- nerdycupid.ai (API provider)\n- lonely.fyi (social connection platform)",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "low",
+  "type": "new_feature",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "letsconnect.love",
+    "nerdycupid.ai",
+    "ecosystem.zone"
+  ],
+  "acceptance_criteria": [
+    "letsconnect.love deployed and accessible",
+    "User registration with profile creation working",
+    "Scientific questionnaire implemented",
+    "NerdyCupid API integration functional",
+    "Match discovery and browsing working",
+    "Messaging between matches working",
+    "AI compatibility insights displayed",
+    "Added to ecosystem.zone directory"
+  ],
+  "testing_plan": "1. Test user registration and profile creation\n2. Test scientific questionnaire flow\n3. Test NerdyCupid API integration\n4. Test match discovery\n5. Test messaging system\n6. Verify AI insights display correctly\n7. Test mobile responsiveness",
+  "rollback_plan": "Remove DNS records and k8s deployment if issues occur",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-27T16:00:00Z",
+  "updated_at": "2025-12-27T16:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-27T16:00:00Z",
+      "text": "Ticket created. Building dating frontend using NerdyCupid.ai scientific matching API. Low risk - API already production-ready."
+    }
+  ]
+}

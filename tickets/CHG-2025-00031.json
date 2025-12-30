@@ -1,0 +1,41 @@
+{
+  "id": "CHG-2025-00031",
+  "title": "SECURITY-001: Private Key Exposure in Environment Variables",
+  "description": "Platform private keys for blockchain operations are stored directly in environment variables without additional encryption or HSM protection.\n\n---\n**Synced from Markdown Ticket**\nOriginal ID: SECURITY-001\nSource: /Users/ryan/development/buildnft.xyz/docs/tickets/SECURITY-001-private-key-exposure.md\nOriginal Assignee: ** Sr. Cloud Security Engineer",
+  "status": "submitted",
+  "priority": "emergency",
+  "risk": "critical",
+  "type": "security",
+  "industry": "",
+  "compliance_frameworks": [
+    "banking_secrecy_act",
+    "sox"
+  ],
+  "affected_systems": [
+    "api",
+    "authentication",
+    "blockchain",
+    "frontend",
+    "backend",
+    "infrastructure",
+    "security"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-30T10:02:10Z",
+  "updated_at": "2025-12-30T10:02:10Z",
+  "sprint": "2025-Q4-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-30T10:02:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

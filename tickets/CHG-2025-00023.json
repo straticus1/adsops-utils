@@ -1,0 +1,30 @@
+{
+  "id": "CHG-2025-00023",
+  "title": "DNS and SSL Remediation - afterdarksys.com Zone",
+  "description": "Fixed DNS records pointing to wrong IP (132.226.54.153 instead of 129.80.158.147) and issued new Let's Encrypt certificates for afterdarksys.com and www.afterdarksys.com. Changes: 1) Updated OCI DNS A records for afterdarksys.com, www.afterdarksys.com, api.afterdarksys.com, login.afterdarksys.com, billing.afterdarksys.com, admin.afterdarksys.com, agents.afterdarksys.com, migration.afterdarksys.com to point to OKE LoadBalancer IP 129.80.158.147. 2) Fixed SSL redirect issue blocking ACME HTTP-01 challenges. 3) Successfully issued Let's Encrypt certificate for afterdarksys.com and www.afterdarksys.com. 4) Restarted nginx-ingress controller to pick up new certificate.",
+  "status": "draft",
+  "priority": "high",
+  "risk": "medium",
+  "type": "",
+  "industry": "",
+  "compliance_frameworks": [],
+  "affected_systems": [],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-28T23:25:50Z",
+  "updated_at": "2025-12-28T23:25:50Z",
+  "sprint": "2025-Q4-Sprint-2",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-28T23:25:50Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

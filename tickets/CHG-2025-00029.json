@@ -1,0 +1,40 @@
+{
+  "id": "CHG-2025-00029",
+  "title": "DNSSCIENCE-001: Site Outage - DNS Misconfiguration \u0026 Missing Caddy Routes",
+  "description": "dnsscience.io was showing a \"Coming Soon - Service migrating to new infrastructure\" page instead of the actual DNS Science application.\n\n---\n**Synced from Markdown Ticket**\nOriginal ID: DNSSCIENCE-001\nSource: /Users/ryan/development/buildnft.xyz/docs/tickets/DNSSCIENCE-001-site-outage-dns-caddy.md\nOriginally Created: 2025-12-30\nOriginally Resolved: 2025-12-30",
+  "status": "submitted",
+  "priority": "urgent",
+  "risk": "high",
+  "type": "incident",
+  "industry": "",
+  "compliance_frameworks": [
+    "hipaa",
+    "sox"
+  ],
+  "affected_systems": [
+    "database",
+    "api",
+    "blockchain",
+    "backend",
+    "infrastructure",
+    "security"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-30T10:02:10Z",
+  "updated_at": "2025-12-30T10:02:10Z",
+  "sprint": "2025-Q4-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-30T10:02:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

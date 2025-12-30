@@ -1,0 +1,40 @@
+{
+  "id": "CHG-2025-00015",
+  "title": "Traffic Bootstrap Campaign - LinkedIn Ads Setup (veribits.com)",
+  "description": "Set up and launch LinkedIn paid advertising campaign for veribits.com targeting Security and Compliance professionals.\n\n## Budget\n- Total: $200\n- Daily: $15/day\n- Duration: 13 days\n\n## Ad Creative\n- **Headline**: \"Trust Is a Vulnerability. Verify Everything.\"\n- **Body**: Automated verification for vendors, identities, and transactions. Reduce fraud, pass audits, sleep better.\n\n## Targeting\n- Job Titles: Security Analyst, Compliance Officer, Risk Manager, Fraud Analyst, GRC Manager\n- Industries: Financial Services, Healthcare, Technology/SaaS\n- Company Size: 100-5000 employees\n\n## Success Metrics\n- Target CAC: < $6.67\n- Target signups: 30+\n- Target CTR: > 0.3%",
+  "status": "pending",
+  "priority": "normal",
+  "risk": "medium",
+  "type": "marketing",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "veribits.com"
+  ],
+  "acceptance_criteria": [
+    "LinkedIn Campaign created for veribits.com",
+    "Targeting configured per spec",
+    "Daily budget set to $15",
+    "Ads approved and running",
+    "UTM parameters on all links"
+  ],
+  "testing_plan": "1. Day 3 review: CTR and initial engagement\n2. Week 1 review: Calculate CAC\n3. Adjust messaging if CTR < 0.2%",
+  "rollback_plan": "Pause campaign if CAC exceeds $15 after 7 days",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "rjc@afterdarksys.com",
+  "approvals_required": [
+    "marketing"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00016"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. $200 of $1,000 budget for veribits.com LinkedIn ads."
+    }
+  ]
+}

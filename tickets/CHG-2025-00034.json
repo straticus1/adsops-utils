@@ -1,0 +1,39 @@
+{
+  "id": "CHG-2025-00034",
+  "title": "SECURITY-004: Remote Code Execution via File Upload",
+  "description": "File upload validation uses client-provided MIME type, allows dangerous file types (SVG), and stores files in web-accessible directory, enabling RCE and XSS attacks.\n\n---\n**Synced from Markdown Ticket**\nOriginal ID: SECURITY-004\nSource: /Users/ryan/development/buildnft.xyz/docs/tickets/SECURITY-004-file-upload-rce.md\nOriginal Assignee: ** Sr. Software Security Engineer",
+  "status": "submitted",
+  "priority": "emergency",
+  "risk": "critical",
+  "type": "security",
+  "industry": "",
+  "compliance_frameworks": [
+    "banking_secrecy_act",
+    "sox"
+  ],
+  "affected_systems": [
+    "api",
+    "authentication",
+    "frontend",
+    "backend",
+    "security"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-30T10:02:10Z",
+  "updated_at": "2025-12-30T10:02:10Z",
+  "sprint": "2025-Q4-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-30T10:02:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

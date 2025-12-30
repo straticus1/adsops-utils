@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
-	"github.com/adsops-utils/internal/config"
+	"github.com/afterdarksys/adsops-utils/internal/config"
 )
 
 // Store provides access to all data stores

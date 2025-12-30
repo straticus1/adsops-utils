@@ -1,0 +1,42 @@
+{
+  "id": "CHG-2025-00026",
+  "title": "DR-001: Comprehensive Disaster Recovery Platform Development",
+  "description": "## Executive Summary\n**Audit Finding:** Approximately 70% of projects in the development portfolio lack functional build systems, and local directories are out of sync with remote repositories. Current state would result in significant recovery effort if systems were lost.\n**Strategic Context:** AWS has been decommissioned as a strategic partner. All infrastructure is being migrated to:\n- **Oracle Cloud Infrastructure (OCI)** - Primary compute and networking\n- **Cloudflare** - CDN, DNS, Workers, security\n\n---\n**Synced from Markdown Ticket**\nOriginal ID: DR-001\nSource: /Users/ryan/development/ads-recovery/tickets/DR-001-comprehensive-recovery-platform.md",
+  "status": "submitted",
+  "priority": "normal",
+  "risk": "medium",
+  "type": "breaking_change",
+  "industry": "",
+  "compliance_frameworks": [
+    "hipaa",
+    "sox"
+  ],
+  "affected_systems": [
+    "database",
+    "api",
+    "authentication",
+    "blockchain",
+    "frontend",
+    "backend",
+    "infrastructure",
+    "security"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2025-12-30T10:02:10Z",
+  "updated_at": "2025-12-30T10:02:10Z",
+  "sprint": "2025-Q4-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2025-12-30T10:02:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

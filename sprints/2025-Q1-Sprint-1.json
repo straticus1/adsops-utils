@@ -10,7 +10,8 @@
     "Deploy changes.afterdarksys.com API",
     "Fix SSL certificate issues on priority sites",
     "Deploy Keycloak identity infrastructure",
-    "Complete secretserver.io identity integration"
+    "Complete secretserver.io identity integration",
+    "Configure DNS for letsconnect.love and cats.centers"
   ],
   "tickets": [
     {
@@ -23,11 +24,16 @@
     },
     {
       "id": "CHG-2025-00002",
-      "title": "Deploy Keycloak OCI Infrastructure",
-      "priority": "normal",
-      "status": "completed",
+      "title": "Network configuration change - DNS and SSL for letsconnect.love and cats.centers",
+      "priority": "high",
+      "status": "in_progress",
       "story_points": 5,
-      "assignee": "claude@afterdarksys.com"
+      "assignee": "claude@afterdarksys.com",
+      "work_window": {
+        "started_at": "2025-12-27T14:00:00Z",
+        "estimated_duration": "2 hours",
+        "phase": "remediation"
+      }
     },
     {
       "id": "CHG-2025-00003",
@@ -57,17 +63,27 @@
   ],
   "completed_tickets": [
     {
-      "id": "CHG-2025-00002",
+      "id": "CHG-2025-00002-old",
       "title": "Deploy Keycloak OCI Infrastructure",
       "completed_at": "2025-12-26T20:45:00Z"
     }
   ],
+  "active_work_windows": [
+    {
+      "ticket_id": "CHG-2025-00002",
+      "started_at": "2025-12-27T14:00:00Z",
+      "team": ["engineering", "architect"],
+      "domains": ["letsconnect.love", "cats.centers"],
+      "phase": "remediation",
+      "status": "active"
+    }
+  ],
   "velocity": {
-    "planned_points": 18,
+    "planned_points": 23,
     "completed_points": 5
   },
   "retrospective": null,
   "created_by": "claude@afterdarksys.com",
   "created_at": "2025-12-26T09:39:00Z",
-  "updated_at": "2025-12-26T20:45:00Z"
+  "updated_at": "2025-12-27T14:00:00Z"
 }

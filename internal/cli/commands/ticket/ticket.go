@@ -31,7 +31,13 @@ Examples:
   changes ticket submit CHG-2025-00001
 
   # Close a completed ticket
-  changes ticket close CHG-2025-00001`,
+  changes ticket close CHG-2025-00001
+
+  # Import tickets from JSON files
+  changes ticket import --all
+
+  # Export tickets to JSON or PDF
+  changes ticket export CHG-2025-00001 --format pdf`,
 }
 
 func init() {
@@ -44,4 +50,7 @@ func init() {
 	TicketCmd.AddCommand(closeCmd)
 	TicketCmd.AddCommand(openCmd)
 	TicketCmd.AddCommand(cancelCmd)
+	TicketCmd.AddCommand(importCmd)
+	TicketCmd.AddCommand(exportCmd)
+	// pdfCmd is registered in pdf.go init()
 }

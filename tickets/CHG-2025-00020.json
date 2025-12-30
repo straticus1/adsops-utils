@@ -1,0 +1,42 @@
+{
+  "id": "CHG-2025-00020",
+  "title": "Traffic Bootstrap Campaign - Month 1 Performance Report",
+  "description": "Comprehensive Month 1 analysis of Traffic Bootstrap campaign performance.\n\n## Report Sections\n\n### 1. Executive Summary\n- Total budget spent\n- Total signups acquired\n- Overall CAC\n- Key wins and learnings\n\n### 2. By Property\n- **cats.center**: Traffic, signups, CAC, top channels\n- **dnsscience.io**: Traffic, signups, CAC, top channels\n- **veribits.com**: Traffic, signups, CAC, top channels\n\n### 3. By Channel\n- Organic (HN, Reddit, Twitter, SEO)\n- Paid (Facebook, LinkedIn, Reddit Ads)\n- Product Hunt\n\n### 4. Recommendations\n- What to scale\n- What to kill\n- Month 2 budget proposal\n- New channels to test\n\n## Deliverables\n- Month 1 Report (PDF/Doc)\n- Month 2 Campaign Plan\n- Updated budget allocation",
+  "status": "pending",
+  "priority": "high",
+  "risk": "low",
+  "type": "review",
+  "industry": "marketing",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "cats.center",
+    "dnsscience.io",
+    "veribits.com"
+  ],
+  "acceptance_criteria": [
+    "All channel data compiled",
+    "CAC calculated per property and channel",
+    "Executive summary completed",
+    "Month 2 recommendations documented",
+    "Report shared with stakeholders"
+  ],
+  "testing_plan": "N/A - report ticket",
+  "rollback_plan": "N/A - report ticket",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-28T12:00:00Z",
+  "updated_at": "2025-12-28T12:00:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00019"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-28T12:00:00Z",
+      "text": "Ticket created from Traffic Bootstrap planning session. Due: Jan 20, 2026 (end of Month 1)."
+    }
+  ]
+}

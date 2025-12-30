@@ -1,6 +1,7 @@
 package ticket
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,7 +11,9 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // CreateTicketData represents the full ticket data for JSON storage
@@ -87,22 +90,80 @@ func init() {
 	createCmd.Flags().Bool("interactive", true, "Use interactive mode")
 }
 
-// getNextTicketNumber determines the next available ticket number
-func getNextTicketNumber() (string, error) {
-	ticketsDir := getTicketsDir()
-	year := time.Now().Year()
+// getMaxTicketNumFromDB attempts to get the max ticket number from the database
+// Returns 0 if database is unavailable or query fails (graceful degradation)
+func getMaxTicketNumFromDB(year int) int {
+	// Try to load database config from viper
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./config")
+	viper.AddConfigPath("/etc/adsops-utils")
+	viper.SetEnvPrefix("ADSOPS")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+	_ = viper.ReadInConfig() // Ignore error, env vars may be enough
 
-	// Ensure tickets directory exists
-	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
-		return "", fmt.Errorf("failed to create tickets directory: %w", err)
+	host := viper.GetString("database.host")
+	port := viper.GetInt("database.port")
+	user := viper.GetString("database.user")
+	password := viper.GetString("database.password")
+	dbname := viper.GetString("database.dbname")
+	sslmode := viper.GetString("database.sslmode")
+
+	// If no database config, return 0 (will use local files only)
+	if host == "" || user == "" || dbname == "" {
+		return 0
 	}
 
+	// Set defaults
+	if port == 0 {
+		port = 5432
+	}
+	if sslmode == "" {
+		sslmode = "disable"
+	}
+
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s connect_timeout=5",
+		host, port, user, password, dbname, sslmode)
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return 0
+	}
+	defer db.Close()
+
+	// Quick connection test with timeout
+	if err := db.Ping(); err != nil {
+		return 0
+	}
+
+	// Query for max ticket number this year
+	var maxNum sql.NullInt64
+	query := `
+		SELECT MAX(
+			CAST(SUBSTRING(ticket_number FROM '[0-9]+$') AS INTEGER)
+		)
+		FROM change_tickets
+		WHERE EXTRACT(YEAR FROM created_at) = $1
+	`
+	if err := db.QueryRow(query, year).Scan(&maxNum); err != nil {
+		return 0
+	}
+
+	if maxNum.Valid {
+		return int(maxNum.Int64)
+	}
+	return 0
+}
+
+// getMaxTicketNumFromFiles scans local JSON files for the max ticket number
+func getMaxTicketNumFromFiles(ticketsDir string, year int) int {
 	entries, err := os.ReadDir(ticketsDir)
 	if err != nil {
-		return "", fmt.Errorf("failed to read tickets directory: %w", err)
+		return 0
 	}
 
-	// Find all ticket numbers for current year
 	var maxNum int
 	prefix := fmt.Sprintf("CHG-%d-", year)
 	for _, entry := range entries {
@@ -121,9 +182,48 @@ func getNextTicketNumber() (string, error) {
 			maxNum = num
 		}
 	}
+	return maxNum
+}
 
+// getNextTicketNumber determines the next available ticket number
+// Checks BOTH local JSON files AND the database (if available) to prevent ID collisions
+func getNextTicketNumber() (string, error) {
+	ticketsDir := getTicketsDir()
+	year := time.Now().Year()
+
+	// Ensure tickets directory exists
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create tickets directory: %w", err)
+	}
+
+	// Get max from local JSON files
+	maxFromFiles := getMaxTicketNumFromFiles(ticketsDir, year)
+
+	// Get max from database (gracefully handles unavailable DB)
+	maxFromDB := getMaxTicketNumFromDB(year)
+
+	// Use the higher of the two
+	maxNum := maxFromFiles
+	if maxFromDB > maxNum {
+		maxNum = maxFromDB
+	}
+
+	// Generate next ID
 	nextNum := maxNum + 1
-	return fmt.Sprintf("CHG-%d-%05d", year, nextNum), nil
+	ticketID := fmt.Sprintf("CHG-%d-%05d", year, nextNum)
+
+	// Final safety check: ensure file doesn't already exist (race condition protection)
+	for {
+		filename := filepath.Join(ticketsDir, ticketID+".json")
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			break // File doesn't exist, safe to use this ID
+		}
+		// File exists, increment and try again
+		nextNum++
+		ticketID = fmt.Sprintf("CHG-%d-%05d", year, nextNum)
+	}
+
+	return ticketID, nil
 }
 
 // saveTicket saves a ticket to the local tickets directory
