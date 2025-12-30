@@ -28,6 +28,9 @@ func NewRouter(cfg *config.Config, logger *zap.Logger) *gin.Engine {
 	router.Use(middleware.RateLimit())
 	router.Use(middleware.SecurityHeaders())
 
+	// API documentation at root
+	router.GET("/", handlers.APIDocumentation)
+
 	// Health endpoints (no auth required)
 	router.GET("/health", handlers.Health)
 	router.GET("/health/ready", handlers.Ready)
