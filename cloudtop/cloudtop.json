@@ -99,7 +99,8 @@
   "defaults": {
     "refresh_interval": "30s",
     "output_format": "table",
-    "show_cached": true
+    "show_cached": true,
+    "show_total_aggregates": true
   },
   "output": {
     "color_enabled": true,

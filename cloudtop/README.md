@@ -127,6 +127,56 @@ Copy `cloudtop.json.example` to `cloudtop.json` and configure your providers:
 
 Uses `~/.oci/config` file format (standard OCI SDK configuration).
 
+## Cost Tracking
+
+cloudtop includes built-in cost tracking for Oracle Cloud resources with support for multiple spend tracking modes:
+
+### Spend Tracking Flags
+
+```bash
+# Show year-to-date spend (from Jan 1 to current day)
+cloudtop --all --ytd
+
+# Show day-of-month spend (from start of month to current day)
+cloudtop --all --dom
+
+# Show last month's total spend
+cloudtop --all --last-month
+cloudtop --all --lm
+
+# Estimate full month spend based on current usage
+cloudtop --all --estimate-month
+cloudtop --all --em
+
+# Combine multiple spend tracking options
+cloudtop --all --ytd --dom --estimate-month
+```
+
+### Pricing Information
+
+- Pricing based on public OCI pricing for commercial regions
+- Supports Standard, AMD, GPU, Bare Metal, and ARM shapes
+- Free tier resources (E2.1.Micro, A1.Flex) correctly priced at $0.00
+- Cost calculations account for actual resource runtime from creation time
+
+### Example Output
+
+```
+=== ORACLE - IAD ========================================
+  Resources: 16 | Est. Monthly Cost: $304.20
+
+======================================================================
+  CROSS-REGION SUMMARY
+======================================================================
+
+  Totals:
+    Resources: 16 across 1 regions (1 providers)
+    Est. Total Monthly Cost: $304.20
+    Year-to-Date Spend: $100.05
+    Day-of-Month Spend: $100.05
+    Estimated Full Month: $258.47
+```
+
 ## Architecture
 
 ```

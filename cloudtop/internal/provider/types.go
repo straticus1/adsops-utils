@@ -143,6 +143,9 @@ type Resource struct {
 	Tags      map[string]string `json:"tags"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
+
+	// Cost tracking
+	HourlyRate float64 `json:"hourly_rate,omitempty"`
 }
 
 // Instance represents a compute instance

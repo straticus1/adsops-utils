@@ -33,6 +33,60 @@ func init() {
 	})
 }
 
+// OCI pricing table (hourly rates in USD for commercial regions)
+var ociPricing = map[string]float64{
+	"VM.Standard2.1":  0.0550,
+	"VM.Standard2.2":  0.1100,
+	"VM.Standard2.4":  0.2200,
+	"VM.Standard2.8":  0.4400,
+	"VM.Standard2.16": 0.8800,
+	"VM.Standard2.24": 1.3200,
+	"VM.Standard3.Flex": 0.0150,
+	"VM.Standard.E2.1":  0.0380,
+	"VM.Standard.E2.2":  0.0760,
+	"VM.Standard.E2.4":  0.1520,
+	"VM.Standard.E2.8":  0.3040,
+	"VM.Standard.E3.Flex": 0.0150,
+	"VM.Standard.E4.Flex": 0.0120,
+	"VM.DenseIO2.8":  0.6800,
+	"VM.DenseIO2.16": 1.3600,
+	"VM.DenseIO2.24": 2.0400,
+	"VM.Optimized3.Flex": 0.0180,
+	"VM.GPU2.1": 1.2750,
+	"VM.GPU3.1": 3.0600,
+	"VM.GPU3.2": 6.1200,
+	"VM.GPU3.4": 12.2400,
+	"BM.GPU3.8": 24.4800,
+	"BM.GPU4.8": 32.7700,
+	"BM.GPU.A100-v2.8": 40.9600,
+	"BM.Standard2.52": 3.3400,
+	"BM.Standard.E3.128": 6.5280,
+	"BM.Standard.E4.128": 5.2224,
+	"VM.Standard.A1.Flex": 0.0015,
+	"VM.Standard.E2.1.Micro": 0.0000,
+	"VM.Standard.A1.Flex.1":  0.0000,
+}
+
+func getShapePricing(shape string) float64 {
+	if price, ok := ociPricing[shape]; ok {
+		return price
+	}
+	if strings.Contains(shape, ".Flex") {
+		baseShape := strings.Split(shape, ".")[0] + "." + strings.Split(shape, ".")[1] + ".Flex"
+		if basePrice, ok := ociPricing[baseShape]; ok {
+			return basePrice
+		}
+	}
+	if strings.Contains(shape, "GPU") {
+		return 3.0
+	} else if strings.Contains(shape, "BM.") {
+		return 3.0
+	} else if strings.Contains(shape, "A1") {
+		return 0.0015
+	}
+	return 0.05
+}
+
 // OracleProvider implements Provider and GPUProvider interfaces
 type OracleProvider struct {
 	config        *provider.ProviderConfig
@@ -474,6 +528,7 @@ func (p *OracleProvider) listInstances(ctx context.Context, filter *provider.Res
 				Region:    inst.Region,
 				Status:    strings.ToLower(inst.LifecycleState),
 				CreatedAt: inst.TimeCreated,
+				HourlyRate: getShapePricing(inst.Shape),
 			},
 			InstanceType: inst.Shape,
 			State:        strings.ToLower(inst.LifecycleState),
