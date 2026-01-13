@@ -1,0 +1,25 @@
+# Binaries
+hostctl
+hostctl-*
+
+# Environment files
+.env
+
+# Go build artifacts
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,129 @@
+---
+# Example Ansible playbook with blackout integration
+#
+# This playbook demonstrates how to integrate the blackout tool
+# with Ansible for automated maintenance workflows.
+#
+# Usage:
+#   ansible-playbook -i inventory.yml ansible-playbook.yml \
+#     -e "ticket=CHG-2024-001" \
+#     -e "duration=2:00" \
+#     -e "reason='Security patching'"
+
+- name: Maintenance with Blackout Integration
+  hosts: webservers
+  serial: 1  # One host at a time
+  vars:
+    ticket: "{{ ticket | default('CHG-UNKNOWN') }}"
+    duration: "{{ duration | default('1:00') }}"
+    reason: "{{ reason | default('Automated maintenance') }}"
+    blackout_tool: /usr/local/bin/blackout
+
+  tasks:
+    - name: Verify blackout tool is installed
+      stat:
+        path: "{{ blackout_tool }}"
+      register: blackout_check
+      delegate_to: localhost
+      run_once: true
+      failed_when: not blackout_check.stat.exists
+
+    - name: Start maintenance blackout
+      command: >
+        {{ blackout_tool }} start
+        {{ ticket }}
+        {{ inventory_hostname }}
+        {{ duration }}
+        "{{ reason }}"
+      delegate_to: localhost
+      register: blackout_start
+      changed_when: true
+
+    - name: Display blackout confirmation
+      debug:
+        msg: "{{ blackout_start.stdout }}"
+
+    - name: Wait for host to enter blackout status
+      pause:
+        seconds: 5
+
+    - name: Perform maintenance tasks
+      block:
+        - name: Update system packages
+          apt:
+            update_cache: yes
+            upgrade: dist
+          when: ansible_os_family == "Debian"
+
+        - name: Update system packages (RedHat)
+          yum:
+            name: '*'
+            state: latest
+          when: ansible_os_family == "RedHat"
+
+        - name: Check if reboot is required
+          stat:
+            path: /var/run/reboot-required
+          register: reboot_required
+
+        - name: Reboot if required
+          reboot:
+            msg: "Rebooting for maintenance"
+            reboot_timeout: 300
+          when: reboot_required.stat.exists | default(false)
+
+        - name: Verify services are running
+          systemd:
+            name: "{{ item }}"
+            state: started
+            enabled: yes
+          loop:
+            - nginx
+            - docker
+          ignore_errors: yes
+
+      rescue:
+        - name: Maintenance failed
+          debug:
+            msg: "Maintenance failed - blackout will be extended"
+
+        - name: Extend blackout due to failure
+          command: >
+            {{ blackout_tool }} extend
+            {{ inventory_hostname }}
+            0:30
+          delegate_to: localhost
+
+        - name: Fail playbook
+          fail:
+            msg: "Maintenance failed for {{ inventory_hostname }}"
+
+    - name: End maintenance blackout
+      command: >
+        {{ blackout_tool }} end
+        {{ inventory_hostname }}
+      delegate_to: localhost
+      register: blackout_end
+      changed_when: true
+
+    - name: Display blackout end confirmation
+      debug:
+        msg: "{{ blackout_end.stdout }}"
+
+    - name: Wait before next host
+      pause:
+        seconds: 10
+      when: inventory_hostname != play_hosts[-1]
+
+- name: Post-maintenance report
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: List any remaining active blackouts
+      command: "{{ blackout_tool | default('/usr/local/bin/blackout') }} list --active"
+      register: active_blackouts
+      changed_when: false
+
+    - name: Display active blackouts
+      debug:
+        msg: "{{ active_blackouts.stdout }}"

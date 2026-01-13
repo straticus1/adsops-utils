@@ -1,0 +1,30 @@
+{
+  "id": "CHG-2026-00006",
+  "title": "Ghidra + CAPA: Malware Analysis Engine for DarkAPI \u0026 BetterPhish",
+  "description": "Implement Ghidra reverse engineering with CAPA behavioral detection for automated malware analysis. Docker-based analysis workers, IOC extraction (C2 domains, IPs, crypto wallets, Telegram bots), MITRE ATT\u0026CK mapping. Integrates with BetterPhish for phishing kit analysis and DarkAPI for malware API endpoints. Feeds IOCs to DNSScience RPZ.",
+  "status": "submitted",
+  "priority": "high",
+  "risk": "medium",
+  "type": "",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-03T12:51:33Z",
+  "updated_at": "2026-01-03T12:51:33Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-03T12:51:33Z",
+      "text": "Ticket created via CLI."
+    }
+  ]
+}

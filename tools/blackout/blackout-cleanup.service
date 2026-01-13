@@ -1,0 +1,21 @@
+[Unit]
+Description=Blackout Auto-Cleanup Service
+Documentation=https://github.com/afterdarksystems/adsops-utils/tools/blackout
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/blackout cleanup
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables (override in /etc/systemd/system/blackout-cleanup.service.d/override.conf)
+Environment="DB_HOST=localhost"
+Environment="DB_PORT=5432"
+Environment="DB_NAME=apiproxy"
+Environment="DB_USER=apiproxy"
+# Environment="DB_PASSWORD=your_password"
+
+[Install]
+WantedBy=multi-user.target

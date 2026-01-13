@@ -1,0 +1,66 @@
+[
+  {
+    "service": "adsops-cli-default",
+    "email": "adsops-service@afterdarksys.com",
+    "description": "API key for adsops CLI tool",
+    "apiKey": "chg_W7fJonU9M0iQr-KVyfSPBXgg1EMa1ngE6dXylrZdo1Q",
+    "keyPrefix": "chg_W7fJonU9M0iQ",
+    "scopes": [
+      "tickets:read",
+      "tickets:write",
+      "approvals:read",
+      "approvals:write"
+    ],
+    "created": "2026-01-10T03:17:21.768Z"
+  },
+  {
+    "service": "ads-ai-staff-automation",
+    "email": "ads-ai-staff@afterdarksys.com",
+    "description": "API key for ads-ai-staff automation",
+    "apiKey": "chg_r2ZORBrPc-BngYhmg_D9ndM5Db0Tfou7CDj_A35yIio",
+    "keyPrefix": "chg_r2ZORBrPc-Bn",
+    "scopes": [
+      "tickets:read",
+      "tickets:write",
+      "approvals:read"
+    ],
+    "created": "2026-01-10T03:17:22.030Z"
+  },
+  {
+    "service": "changes-notifier-daemon",
+    "email": "changes-notifier@afterdarksys.com",
+    "description": "API key for email notification daemon",
+    "apiKey": "chg_CbPT0PMD6lXD2eXHvYYf5ID0t8KgX0YosWw1lSK31JY",
+    "keyPrefix": "chg_CbPT0PMD6lXD",
+    "scopes": [
+      "tickets:read",
+      "approvals:read"
+    ],
+    "created": "2026-01-10T03:17:22.710Z"
+  },
+  {
+    "service": "infrastructure-monitor",
+    "email": "infrastructure-monitor@afterdarksys.com",
+    "description": "API key for infrastructure monitoring integration",
+    "apiKey": "chg_2C1z9sbjpxm646KIDRBTgyhQWUE21tuHAaK40WhLuOs",
+    "keyPrefix": "chg_2C1z9sbjpxm6",
+    "scopes": [
+      "tickets:read",
+      "tickets:write"
+    ],
+    "created": "2026-01-10T03:17:22.949Z"
+  },
+  {
+    "service": "deployment-ci-cd",
+    "email": "deployment-pipeline@afterdarksys.com",
+    "description": "API key for CI/CD deployment automation",
+    "apiKey": "chg_fBr6-NrFPMTrLRO2n-wMyUi3QLL1g1lKc4VnMIsfGTg",
+    "keyPrefix": "chg_fBr6-NrFPMTr",
+    "scopes": [
+      "tickets:read",
+      "tickets:write",
+      "approvals:read"
+    ],
+    "created": "2026-01-10T03:17:23.247Z"
+  }
+]

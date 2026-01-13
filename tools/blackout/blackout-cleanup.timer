@@ -1,0 +1,13 @@
+[Unit]
+Description=Blackout Auto-Cleanup Timer
+Documentation=https://github.com/afterdarksystems/adsops-utils/tools/blackout
+Requires=blackout-cleanup.service
+
+[Timer]
+# Run every 5 minutes
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
