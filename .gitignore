@@ -76,3 +76,5 @@ __debug_bin
 # Go workspace files
 go.work
 go.work.sum
+tools/blackout/blackout-linux
+tools/hostctl/hostctl-linux
