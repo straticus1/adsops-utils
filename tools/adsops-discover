@@ -1,0 +1,516 @@
+#!/usr/local/bin/bash
+# adsops-discover - OCI Resource Discovery and Access Path Determination
+# Discovers resources via OCI CLI and determines appropriate access methods
+#
+# Usage:
+#   adsops-discover [command] [options]
+#   source /usr/local/sshkeys/adsops-discover  # For library usage
+
+set -e
+
+# Source context detection
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/adsops-context" 2>/dev/null || true
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m'
+
+# Cache settings
+CACHE_DIR="${ADSOPS_CACHE_DIR:-$HOME/.adsops/cache}"
+CACHE_TTL="${ADSOPS_CACHE_TTL:-300}"  # 5 minutes
+
+# Resource type definitions - which types support which access methods
+declare -A RESOURCE_ACCESS_METHODS=(
+    ["instance"]="ssh,console,vnc"
+    ["load-balancer"]="none"              # Cannot SSH to LB
+    ["network-load-balancer"]="none"      # Cannot SSH to NLB
+    ["db-system"]="db-connect,bastion"    # DB systems - use DB client
+    ["autonomous-database"]="db-connect"  # ATP/ADW
+    ["bastion"]="bastion-session"         # Bastion host
+    ["container-instance"]="exec,logs"    # Container instances
+    ["cluster"]="kubectl,oci-cli"         # OKE clusters
+)
+
+# Resource type warnings
+declare -A RESOURCE_WARNINGS=(
+    ["load-balancer"]="Load balancers do not support direct SSH access. Connect to backend instances instead."
+    ["network-load-balancer"]="Network load balancers do not support direct SSH access. Connect to backend instances instead."
+    ["db-system"]="Use database client to connect, not SSH. For OS access, use bastion service."
+    ["autonomous-database"]="Autonomous databases are fully managed. Use SQL client with wallet."
+)
+
+# Ensure cache directory exists
+mkdir -p "$CACHE_DIR"
+
+# Check if cache is valid
+_cache_valid() {
+    local cache_file="$1"
+    if [ ! -f "$cache_file" ]; then
+        return 1
+    fi
+    local file_age=$(($(date +%s) - $(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null)))
+    [ "$file_age" -lt "$CACHE_TTL" ]
+}
+
+# Get cached or fresh data
+_cached_oci() {
+    local cache_key="$1"
+    shift
+    local cache_file="$CACHE_DIR/${cache_key}.json"
+
+    if _cache_valid "$cache_file"; then
+        cat "$cache_file"
+        return 0
+    fi
+
+    # Run OCI command and cache result
+    local result
+    if result=$(oci "$@" 2>/dev/null); then
+        echo "$result" > "$cache_file"
+        echo "$result"
+        return 0
+    fi
+    return 1
+}
+
+# Discover all compartments
+discover_compartments() {
+    _cached_oci "compartments" iam compartment list --all \
+        --query 'data[*].{id:id,name:name,state:"lifecycle-state"}' \
+        --output json
+}
+
+# Discover compute instances in a compartment
+discover_instances() {
+    local compartment_id="$1"
+    local cache_key="instances_${compartment_id: -12}"
+
+    _cached_oci "$cache_key" compute instance list \
+        --compartment-id "$compartment_id" \
+        --lifecycle-state RUNNING \
+        --query 'data[*].{id:id,name:"display-name",shape:shape,state:"lifecycle-state",ad:"availability-domain"}' \
+        --output json
+}
+
+# Get VNIC attachments for an instance
+get_instance_vnics() {
+    local compartment_id="$1"
+    local instance_id="$2"
+    local cache_key="vnics_${instance_id: -12}"
+
+    _cached_oci "$cache_key" compute vnic-attachment list \
+        --compartment-id "$compartment_id" \
+        --instance-id "$instance_id" \
+        --query 'data[*].{"vnic-id":"vnic-id",state:"lifecycle-state"}' \
+        --output json
+}
+
+# Get VNIC details (including IPs)
+get_vnic_details() {
+    local vnic_id="$1"
+    local cache_key="vnic_${vnic_id: -12}"
+
+    _cached_oci "$cache_key" network vnic get \
+        --vnic-id "$vnic_id" \
+        --query 'data.{id:id,private:"private-ip",public:"public-ip",hostname:"hostname-label",subnet:"subnet-id"}' \
+        --output json
+}
+
+# Discover load balancers
+discover_load_balancers() {
+    local compartment_id="$1"
+    local cache_key="lbs_${compartment_id: -12}"
+
+    _cached_oci "$cache_key" lb load-balancer list \
+        --compartment-id "$compartment_id" \
+        --lifecycle-state ACTIVE \
+        --query 'data[*].{id:id,name:"display-name",ip:"ip-addresses[0].ip-address",shape:"shape-name",type:"is-private"}' \
+        --output json
+}
+
+# Discover network load balancers
+discover_network_load_balancers() {
+    local compartment_id="$1"
+    local cache_key="nlbs_${compartment_id: -12}"
+
+    _cached_oci "$cache_key" nlb network-load-balancer list \
+        --compartment-id "$compartment_id" \
+        --lifecycle-state ACTIVE \
+        --query 'data.items[*].{id:id,name:"display-name",ip:"ip-addresses[0].ip-address",type:"is-private"}' \
+        --output json 2>/dev/null || echo '[]'
+}
+
+# Get load balancer backend sets and instances
+get_lb_backends() {
+    local lb_id="$1"
+    local cache_key="lb_backends_${lb_id: -12}"
+
+    _cached_oci "$cache_key" lb backend-set list \
+        --load-balancer-id "$lb_id" \
+        --query 'data[*].{name:name,backends:backends}' \
+        --output json
+}
+
+# Discover DB systems
+discover_db_systems() {
+    local compartment_id="$1"
+    local cache_key="db_systems_${compartment_id: -12}"
+
+    _cached_oci "$cache_key" db system list \
+        --compartment-id "$compartment_id" \
+        --lifecycle-state AVAILABLE \
+        --query 'data[*].{id:id,name:"display-name",shape:shape,db:"db-version",type:"database-edition"}' \
+        --output json 2>/dev/null || echo '[]'
+}
+
+# Check if an IP belongs to a load balancer
+is_load_balancer_ip() {
+    local ip="$1"
+    local compartments
+
+    compartments=$(discover_compartments)
+
+    # Check each compartment for LBs
+    echo "$compartments" | jq -r '.[].id' | while read -r comp_id; do
+        # Check standard load balancers
+        local lbs=$(discover_load_balancers "$comp_id")
+        if echo "$lbs" | jq -e ".[] | select(.ip == \"$ip\")" &>/dev/null; then
+            echo "load-balancer"
+            return 0
+        fi
+
+        # Check network load balancers
+        local nlbs=$(discover_network_load_balancers "$comp_id")
+        if echo "$nlbs" | jq -e ".[] | select(.ip == \"$ip\")" &>/dev/null; then
+            echo "network-load-balancer"
+            return 0
+        fi
+    done
+
+    echo "unknown"
+}
+
+# Determine resource type from IP or hostname
+identify_resource() {
+    local target="$1"
+    local ip="$target"
+
+    # If it's a hostname, resolve it
+    if ! [[ "$target" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        ip=$(dig +short "$target" | head -1)
+        if [ -z "$ip" ]; then
+            echo -e "${RED}Cannot resolve hostname: $target${NC}" >&2
+            return 1
+        fi
+    fi
+
+    echo -e "${CYAN}Identifying resource for IP: $ip${NC}" >&2
+
+    local compartments
+    compartments=$(discover_compartments)
+
+    # Check all compartments
+    while read -r comp_id; do
+        [ -z "$comp_id" ] && continue
+
+        # Check instances
+        local instances=$(discover_instances "$comp_id")
+        while read -r instance_id; do
+            [ -z "$instance_id" ] && continue
+
+            local vnics=$(get_instance_vnics "$comp_id" "$instance_id")
+            while read -r vnic_id; do
+                [ -z "$vnic_id" ] && continue
+
+                local vnic_details=$(get_vnic_details "$vnic_id")
+                local private_ip=$(echo "$vnic_details" | jq -r '.private // empty')
+                local public_ip=$(echo "$vnic_details" | jq -r '.public // empty')
+
+                if [ "$ip" = "$private_ip" ] || [ "$ip" = "$public_ip" ]; then
+                    local instance_name=$(echo "$instances" | jq -r ".[] | select(.id == \"$instance_id\") | .name")
+                    echo "instance:$instance_name:$instance_id"
+                    return 0
+                fi
+            done < <(echo "$vnics" | jq -r '.[]."vnic-id" // empty')
+        done < <(echo "$instances" | jq -r '.[].id // empty')
+
+        # Check load balancers
+        local lbs=$(discover_load_balancers "$comp_id")
+        local lb_match=$(echo "$lbs" | jq -r ".[] | select(.ip == \"$ip\") | .name")
+        if [ -n "$lb_match" ]; then
+            local lb_id=$(echo "$lbs" | jq -r ".[] | select(.ip == \"$ip\") | .id")
+            echo "load-balancer:$lb_match:$lb_id"
+            return 0
+        fi
+
+        # Check network load balancers
+        local nlbs=$(discover_network_load_balancers "$comp_id")
+        local nlb_match=$(echo "$nlbs" | jq -r ".[] | select(.ip == \"$ip\") | .name")
+        if [ -n "$nlb_match" ]; then
+            local nlb_id=$(echo "$nlbs" | jq -r ".[] | select(.ip == \"$ip\") | .id")
+            echo "network-load-balancer:$nlb_match:$nlb_id"
+            return 0
+        fi
+
+    done < <(echo "$compartments" | jq -r '.[].id // empty')
+
+    echo "unknown:$target:"
+}
+
+# Get access recommendations for a resource
+get_access_recommendation() {
+    local target="$1"
+    local resource_info
+
+    resource_info=$(identify_resource "$target")
+    local resource_type="${resource_info%%:*}"
+    local resource_name="${resource_info#*:}"
+    resource_name="${resource_name%%:*}"
+    local resource_id="${resource_info##*:}"
+
+    echo ""
+    echo -e "${BLUE}=== Resource Access Recommendation ===${NC}"
+    echo ""
+    echo -e "  ${CYAN}Target:${NC}         $target"
+    echo -e "  ${CYAN}Resource Type:${NC}  $resource_type"
+    echo -e "  ${CYAN}Resource Name:${NC}  $resource_name"
+
+    # Show warning if applicable
+    local warning="${RESOURCE_WARNINGS[$resource_type]}"
+    if [ -n "$warning" ]; then
+        echo ""
+        echo -e "  ${YELLOW}WARNING: $warning${NC}"
+    fi
+
+    # Show access methods
+    local methods="${RESOURCE_ACCESS_METHODS[$resource_type]}"
+    echo ""
+    echo -e "  ${CYAN}Access Methods:${NC} ${methods:-unknown}"
+
+    case "$resource_type" in
+        instance)
+            echo ""
+            echo -e "${GREEN}Recommended: SSH directly to instance${NC}"
+            echo "  ssh opc@$target"
+            echo ""
+            echo "Or via OCI Bastion:"
+            echo "  oci bastion session create-managed-ssh ..."
+            ;;
+        load-balancer|network-load-balancer)
+            echo ""
+            echo -e "${RED}Cannot SSH to load balancer. Getting backend instances...${NC}"
+
+            if [ -n "$resource_id" ]; then
+                local backends=$(get_lb_backends "$resource_id" 2>/dev/null)
+                if [ -n "$backends" ]; then
+                    echo ""
+                    echo -e "${GREEN}Backend Instances:${NC}"
+                    echo "$backends" | jq -r '.[] | .backends[]? | "  \(.["ip-address"]):\(.port)"'
+                    echo ""
+                    echo "Connect to a backend instance instead:"
+                    local first_backend=$(echo "$backends" | jq -r '.[0].backends[0]."ip-address" // empty')
+                    if [ -n "$first_backend" ]; then
+                        echo "  ssh opc@$first_backend"
+                    fi
+                fi
+            fi
+            ;;
+        db-system)
+            echo ""
+            echo -e "${GREEN}Recommended: Use database client${NC}"
+            echo "  sqlplus username@//host:1521/service_name"
+            echo "  psql -h $target -U username -d dbname"
+            ;;
+        unknown)
+            echo ""
+            echo -e "${YELLOW}Resource not found in OCI. This may be:${NC}"
+            echo "  - An on-premise resource"
+            echo "  - A resource in a different tenancy"
+            echo "  - A non-OCI resource"
+            echo ""
+            echo "Attempting direct connectivity check..."
+
+            if _can_reach_direct "${target%:*}" "${target#*:}" 2>/dev/null || _can_reach_direct "$target" "22" 2>/dev/null; then
+                echo -e "${GREEN}Port 22 is reachable${NC}"
+                echo "  ssh opc@$target"
+            else
+                echo -e "${YELLOW}Port 22 not reachable. May need tunnel.${NC}"
+                local needs=$(adsops_need_tunnel "$(echo $target | tr '.' '_')" 2>/dev/null || echo "unknown")
+                if [ "$needs" = "true" ]; then
+                    echo "  Use Cloudflare tunnel for access"
+                fi
+            fi
+            ;;
+    esac
+}
+
+# List all resources across compartments
+list_all_resources() {
+    local filter_type="${1:-all}"
+
+    echo -e "${BLUE}=== OCI Resource Discovery ===${NC}"
+    echo ""
+
+    local compartments
+    compartments=$(discover_compartments)
+
+    echo "$compartments" | jq -r '.[] | "\(.name)|\(.id)"' | while IFS='|' read -r comp_name comp_id; do
+        [ -z "$comp_id" ] && continue
+
+        echo -e "${MAGENTA}Compartment: $comp_name${NC}"
+
+        # Instances
+        if [ "$filter_type" = "all" ] || [ "$filter_type" = "instances" ]; then
+            local instances=$(discover_instances "$comp_id")
+            local instance_count=$(echo "$instances" | jq 'length // 0' 2>/dev/null || echo 0)
+            if [ "$instance_count" -gt 0 ] 2>/dev/null; then
+                echo -e "  ${GREEN}Compute Instances ($instance_count):${NC}"
+                echo "$instances" | jq -r '.[] | "    \(.name) [\(.shape)] - \(.state)"'
+            fi
+        fi
+
+        # Load Balancers
+        if [ "$filter_type" = "all" ] || [ "$filter_type" = "load-balancers" ]; then
+            local lbs=$(discover_load_balancers "$comp_id")
+            local lb_count=$(echo "$lbs" | jq 'length // 0' 2>/dev/null || echo 0)
+            if [ "$lb_count" -gt 0 ] 2>/dev/null; then
+                echo -e "  ${YELLOW}Load Balancers ($lb_count):${NC}"
+                echo "$lbs" | jq -r '.[] | "    \(.name) - \(.ip // "private") [\(.shape)]"'
+            fi
+
+            local nlbs=$(discover_network_load_balancers "$comp_id")
+            local nlb_count=$(echo "$nlbs" | jq 'length // 0' 2>/dev/null || echo 0)
+            if [ "$nlb_count" -gt 0 ] 2>/dev/null; then
+                echo -e "  ${YELLOW}Network Load Balancers ($nlb_count):${NC}"
+                echo "$nlbs" | jq -r '.[] | "    \(.name) - \(.ip // "private")"'
+            fi
+        fi
+
+        # DB Systems
+        if [ "$filter_type" = "all" ] || [ "$filter_type" = "databases" ]; then
+            local dbs=$(discover_db_systems "$comp_id")
+            local db_count=$(echo "$dbs" | jq 'length // 0' 2>/dev/null || echo 0)
+            if [ "$db_count" -gt 0 ] 2>/dev/null; then
+                echo -e "  ${CYAN}DB Systems ($db_count):${NC}"
+                echo "$dbs" | jq -r '.[] | "    \(.name) [\(.shape)] - \(.db) \(.type)"'
+            fi
+        fi
+
+        echo ""
+    done
+}
+
+# Clear discovery cache
+clear_cache() {
+    rm -rf "$CACHE_DIR"/*.json
+    echo -e "${GREEN}Cache cleared${NC}"
+}
+
+# Main function
+main() {
+    local command="${1:-list}"
+    shift || true
+
+    case "$command" in
+        list|ls)
+            list_all_resources "$@"
+            ;;
+        identify|id)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-discover identify <ip-or-hostname>"
+                exit 1
+            fi
+            identify_resource "$1"
+            ;;
+        access|recommend)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-discover access <ip-or-hostname>"
+                exit 1
+            fi
+            get_access_recommendation "$1"
+            ;;
+        compartments)
+            discover_compartments | jq '.'
+            ;;
+        instances)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-discover instances <compartment-id>"
+                exit 1
+            fi
+            discover_instances "$1" | jq '.'
+            ;;
+        load-balancers|lbs)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-discover load-balancers <compartment-id>"
+                exit 1
+            fi
+            discover_load_balancers "$1" | jq '.'
+            ;;
+        is-lb)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-discover is-lb <ip>"
+                exit 1
+            fi
+            is_load_balancer_ip "$1"
+            ;;
+        clear-cache)
+            clear_cache
+            ;;
+        help|--help|-h)
+            cat <<EOF
+adsops-discover - OCI Resource Discovery and Access Path Determination
+
+Usage: adsops-discover <command> [options]
+
+Commands:
+  list [type]           List all OCI resources (instances, load-balancers, databases)
+  identify <target>     Identify resource type from IP or hostname
+  access <target>       Get access recommendations for a target
+  compartments          List all compartments
+  instances <comp-id>   List instances in a compartment
+  load-balancers <id>   List load balancers in a compartment
+  is-lb <ip>            Check if IP is a load balancer
+  clear-cache           Clear the discovery cache
+  help                  Show this help
+
+Examples:
+  adsops-discover list                    # List all resources
+  adsops-discover list instances          # List only instances
+  adsops-discover access 132.145.179.230  # Get access recommendation
+  adsops-discover identify myhost.local   # Identify resource type
+
+Resource Types Detected:
+  instance              Compute instance (supports SSH)
+  load-balancer         Application load balancer (NO SSH)
+  network-load-balancer Network load balancer (NO SSH)
+  db-system             Database system (use DB client)
+  autonomous-database   Autonomous DB (use SQL client + wallet)
+
+Cache:
+  Discovery results are cached for ${CACHE_TTL}s in $CACHE_DIR
+  Use 'clear-cache' to force fresh discovery
+EOF
+            ;;
+        *)
+            # If argument looks like an IP/hostname, treat as 'access' command
+            if [[ "$command" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$command" =~ \. ]]; then
+                get_access_recommendation "$command"
+            else
+                echo "Unknown command: $command"
+                echo "Run 'adsops-discover help' for usage"
+                exit 1
+            fi
+            ;;
+    esac
+}
+
+# Run main if executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

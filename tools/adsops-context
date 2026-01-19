@@ -1,0 +1,501 @@
+#!/usr/local/bin/bash
+# adsops-context - Context-aware environment detection and configuration
+# Determines execution context (host/docker/k8s) and appropriate access paths
+#
+# Usage:
+#   source /usr/local/sshkeys/adsops-context
+#   adsops_detect_context
+#   adsops_get_db_host
+#   adsops_need_tunnel <target>
+
+set -e
+
+# Colors
+_RED='\033[0;31m'
+_GREEN='\033[0;32m'
+_YELLOW='\033[1;33m'
+_BLUE='\033[0;34m'
+_CYAN='\033[0;36m'
+_NC='\033[0m'
+
+# Script directory for finding config
+ADSOPS_DIR="${ADSOPS_DIR:-/usr/local/sshkeys}"
+ADSOPS_CONFIG_DIR="${ADSOPS_CONFIG_DIR:-$HOME/.adsops/config}"
+
+# Context detection results (populated by adsops_detect_context)
+ADSOPS_CONTEXT=""           # host, docker, kubernetes
+ADSOPS_NETWORK_CONTEXT=""   # local, oci-internal, external
+ADSOPS_HOSTNAME=""
+ADSOPS_CONTAINER_ID=""
+ADSOPS_K8S_NAMESPACE=""
+ADSOPS_K8S_POD=""
+
+# Known endpoints and their access requirements
+declare -A ADSOPS_ENDPOINTS=(
+    ["inventory_db"]="afterdarksys.com:5432"
+    ["apiproxy_db"]="localhost:5432"
+    ["keycloak_db"]="129.80.158.147:5432"
+    ["keycloak_ssh"]="129.80.158.147:22"
+    ["managedcrypto_ssh"]="150.136.119.6:22"
+    ["darkapi_ssh"]="132.145.179.230:22"
+)
+
+# Cloudflare tunnel hostnames for endpoints that need them
+declare -A ADSOPS_TUNNEL_HOSTS=(
+    ["keycloak_db"]="keycloak-db.adstelco.io"
+    ["keycloak_ssh"]="ssh-keycloak-direct.adstelco.io"
+    ["managedcrypto_ssh"]="ssh.adstelco.io"
+)
+
+# OCI internal IPs that can access each other directly
+declare -A ADSOPS_OCI_INTERNAL=(
+    ["129.80.142.72"]="true"   # cloudflared connector
+    ["129.80.158.147"]="true"  # keycloak
+    ["150.136.119.6"]="true"   # managedcrypto
+    ["132.145.179.230"]="true" # darkapi
+)
+
+# Detect execution context
+adsops_detect_context() {
+    ADSOPS_HOSTNAME=$(hostname -s 2>/dev/null || echo "unknown")
+
+    # Check for Kubernetes
+    if [ -f /var/run/secrets/kubernetes.io/serviceaccount/namespace ]; then
+        ADSOPS_CONTEXT="kubernetes"
+        ADSOPS_K8S_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+        ADSOPS_K8S_POD=$(hostname)
+        _detect_k8s_network
+        return 0
+    fi
+
+    # Check for Docker
+    if [ -f /.dockerenv ] || grep -q docker /proc/1/cgroup 2>/dev/null || grep -q containerd /proc/1/cgroup 2>/dev/null; then
+        ADSOPS_CONTEXT="docker"
+        ADSOPS_CONTAINER_ID=$(cat /proc/self/cgroup 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || echo "unknown")
+        _detect_docker_network
+        return 0
+    fi
+
+    # Default to host
+    ADSOPS_CONTEXT="host"
+    _detect_host_network
+    return 0
+}
+
+# Detect network context for host machines
+_detect_host_network() {
+    local my_ip
+
+    # Get primary IP
+    if command -v ip &>/dev/null; then
+        my_ip=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \K\S+' || echo "")
+    elif command -v ifconfig &>/dev/null; then
+        my_ip=$(ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
+    fi
+
+    # Check if we're on an OCI internal network
+    if [ -n "$my_ip" ] && [[ "${ADSOPS_OCI_INTERNAL[$my_ip]:-}" == "true" ]]; then
+        ADSOPS_NETWORK_CONTEXT="oci-internal"
+        return 0
+    fi
+
+    # Check if we can reach OCI internal directly (same VCN/peered)
+    if _can_reach_direct "129.80.142.72" "22"; then
+        ADSOPS_NETWORK_CONTEXT="oci-internal"
+        return 0
+    fi
+
+    ADSOPS_NETWORK_CONTEXT="external"
+}
+
+# Detect network context for Docker containers
+_detect_docker_network() {
+    # Check if we can access host.docker.internal
+    if _can_resolve "host.docker.internal"; then
+        # We're on Docker Desktop or similar
+        ADSOPS_NETWORK_CONTEXT="external"
+        return 0
+    fi
+
+    # Check for OCI internal access
+    if _can_reach_direct "129.80.142.72" "22"; then
+        ADSOPS_NETWORK_CONTEXT="oci-internal"
+        return 0
+    fi
+
+    ADSOPS_NETWORK_CONTEXT="external"
+}
+
+# Detect network context for Kubernetes pods
+_detect_k8s_network() {
+    # Kubernetes pods on OCI typically have internal access
+    # Check by trying to reach known OCI internal IPs
+    if _can_reach_direct "129.80.142.72" "22"; then
+        ADSOPS_NETWORK_CONTEXT="oci-internal"
+        return 0
+    fi
+
+    ADSOPS_NETWORK_CONTEXT="external"
+}
+
+# Check if we can resolve a hostname
+_can_resolve() {
+    local host="$1"
+    getent hosts "$host" &>/dev/null || host "$host" &>/dev/null
+}
+
+# Check if we can reach an endpoint directly (TCP connect test)
+_can_reach_direct() {
+    local host="$1"
+    local port="$2"
+    local timeout="${3:-1}"  # Default 1 second for faster checks
+
+    # macOS nc supports -G for connect timeout, -w for general timeout
+    if [[ "$(uname)" == "Darwin" ]] && command -v nc &>/dev/null; then
+        nc -z -G "$timeout" "$host" "$port" &>/dev/null
+        return $?
+    elif command -v nc &>/dev/null; then
+        nc -z -w "$timeout" "$host" "$port" &>/dev/null
+        return $?
+    elif command -v gtimeout &>/dev/null; then
+        gtimeout "$timeout" bash -c "exec 3<>/dev/tcp/$host/$port" &>/dev/null
+        return $?
+    elif command -v timeout &>/dev/null; then
+        timeout "$timeout" bash -c "exec 3<>/dev/tcp/$host/$port" &>/dev/null
+        return $?
+    else
+        # Fallback - try bash /dev/tcp with backgrounding for timeout
+        ( exec 3<>/dev/tcp/"$host"/"$port" ) &>/dev/null &
+        local pid=$!
+        sleep "$timeout"
+        if kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null
+            return 1
+        fi
+        wait "$pid" 2>/dev/null
+        return $?
+    fi
+}
+
+# Determine if tunnel is needed for a given endpoint
+adsops_need_tunnel() {
+    local endpoint="$1"
+    local skip_connectivity_check="${2:-false}"
+
+    # Ensure context is detected
+    [ -z "$ADSOPS_CONTEXT" ] && adsops_detect_context
+
+    # If we're on OCI internal network, no tunnel needed for OCI resources
+    if [ "$ADSOPS_NETWORK_CONTEXT" = "oci-internal" ]; then
+        echo "false"
+        return 0
+    fi
+
+    # Check if this endpoint has a tunnel option configured
+    if [ -n "${ADSOPS_TUNNEL_HOSTS[$endpoint]:-}" ]; then
+        # For external networks with tunnel configured, assume we need it
+        # Skip connectivity check for faster response
+        if [ "$skip_connectivity_check" = "true" ] || [ "$ADSOPS_NETWORK_CONTEXT" = "external" ]; then
+            echo "true"
+            return 0
+        fi
+    fi
+
+    # If no tunnel configured and we're external, check direct connectivity
+    local ep="${ADSOPS_ENDPOINTS[$endpoint]:-}"
+    if [ -n "$ep" ]; then
+        local host="${ep%:*}"
+        local port="${ep#*:}"
+        if _can_reach_direct "$host" "$port"; then
+            echo "false"
+            return 0
+        fi
+    fi
+
+    # Default: need tunnel for external networks
+    echo "true"
+}
+
+# Get the appropriate host for an endpoint based on context
+adsops_get_endpoint() {
+    local endpoint="$1"
+    local prefer_tunnel="${2:-auto}"  # auto, tunnel, direct
+
+    # Ensure context is detected
+    [ -z "$ADSOPS_CONTEXT" ] && adsops_detect_context
+
+    local direct_ep="${ADSOPS_ENDPOINTS[$endpoint]}"
+    local tunnel_host="${ADSOPS_TUNNEL_HOSTS[$endpoint]}"
+
+    case "$prefer_tunnel" in
+        direct)
+            echo "$direct_ep"
+            return 0
+            ;;
+        tunnel)
+            if [ -n "$tunnel_host" ]; then
+                echo "tunnel:$tunnel_host"
+            else
+                echo "$direct_ep"
+            fi
+            return 0
+            ;;
+        auto|*)
+            if [ "$(adsops_need_tunnel "$endpoint")" = "true" ] && [ -n "$tunnel_host" ]; then
+                echo "tunnel:$tunnel_host"
+            else
+                echo "$direct_ep"
+            fi
+            return 0
+            ;;
+    esac
+}
+
+# Get database connection parameters based on context
+adsops_get_db_params() {
+    local db_type="$1"  # inventory, apiproxy, keycloak
+
+    # Ensure context is detected
+    [ -z "$ADSOPS_CONTEXT" ] && adsops_detect_context
+
+    case "$db_type" in
+        inventory)
+            local endpoint=$(adsops_get_endpoint "inventory_db")
+            if [[ "$endpoint" == tunnel:* ]]; then
+                # Need to use cloudflared access tcp
+                echo "NEEDS_TUNNEL=true"
+                echo "TUNNEL_HOST=${endpoint#tunnel:}"
+                echo "LOCAL_PORT=15432"
+            else
+                echo "DB_HOST=${endpoint%:*}"
+                echo "DB_PORT=${endpoint#*:}"
+            fi
+            ;;
+        apiproxy)
+            # apiproxy DB is always local
+            echo "DB_HOST=localhost"
+            echo "DB_PORT=5432"
+            ;;
+        keycloak)
+            local endpoint=$(adsops_get_endpoint "keycloak_db")
+            if [[ "$endpoint" == tunnel:* ]]; then
+                echo "NEEDS_TUNNEL=true"
+                echo "TUNNEL_HOST=${endpoint#tunnel:}"
+                echo "LOCAL_PORT=25432"
+            else
+                echo "DB_HOST=${endpoint%:*}"
+                echo "DB_PORT=${endpoint#*:}"
+            fi
+            ;;
+    esac
+}
+
+# Load environment configuration
+adsops_load_env() {
+    local env_file="${1:-$ADSOPS_DIR/.env}"
+
+    if [ -f "$env_file" ]; then
+        # Export all variables from .env, handling comments
+        while IFS='=' read -r key value; do
+            # Skip comments and empty lines
+            [[ "$key" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "$key" ]] && continue
+
+            # Remove leading/trailing whitespace
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
+
+            # Export if not already set
+            if [ -z "${!key}" ]; then
+                export "$key=$value"
+            fi
+        done < "$env_file"
+        return 0
+    fi
+    return 1
+}
+
+# Print context information
+adsops_show_context() {
+    # Ensure context is detected
+    [ -z "$ADSOPS_CONTEXT" ] && adsops_detect_context
+
+    echo -e "${_BLUE}=== AdsOps Execution Context ===${_NC}"
+    echo ""
+    echo -e "  ${_CYAN}Context:${_NC}         $ADSOPS_CONTEXT"
+    echo -e "  ${_CYAN}Network:${_NC}         $ADSOPS_NETWORK_CONTEXT"
+    echo -e "  ${_CYAN}Hostname:${_NC}        $ADSOPS_HOSTNAME"
+
+    case "$ADSOPS_CONTEXT" in
+        kubernetes)
+            echo -e "  ${_CYAN}Namespace:${_NC}       $ADSOPS_K8S_NAMESPACE"
+            echo -e "  ${_CYAN}Pod:${_NC}             $ADSOPS_K8S_POD"
+            ;;
+        docker)
+            echo -e "  ${_CYAN}Container ID:${_NC}    ${ADSOPS_CONTAINER_ID:0:12}"
+            ;;
+    esac
+
+    echo ""
+    echo -e "${_BLUE}=== Endpoint Accessibility ===${_NC}"
+    echo ""
+
+    for endpoint in "${!ADSOPS_ENDPOINTS[@]}"; do
+        local needs_tunnel=$(adsops_need_tunnel "$endpoint")
+        local ep="${ADSOPS_ENDPOINTS[$endpoint]}"
+        local tunnel="${ADSOPS_TUNNEL_HOSTS[$endpoint]}"
+
+        if [ "$needs_tunnel" = "true" ]; then
+            if [ -n "$tunnel" ]; then
+                echo -e "  ${_YELLOW}$endpoint${_NC}"
+                echo -e "    Direct: $ep ${_RED}(blocked)${_NC}"
+                echo -e "    Tunnel: ${_GREEN}$tunnel${_NC}"
+            else
+                echo -e "  ${_RED}$endpoint${_NC}"
+                echo -e "    Direct: $ep ${_RED}(blocked, no tunnel)${_NC}"
+            fi
+        else
+            echo -e "  ${_GREEN}$endpoint${_NC}"
+            echo -e "    Direct: $ep ${_GREEN}(accessible)${_NC}"
+        fi
+    done
+
+    echo ""
+}
+
+# Start a cloudflare tunnel for an endpoint
+adsops_start_tunnel() {
+    local endpoint="$1"
+    local local_port="${2:-0}"  # 0 = auto-assign
+
+    local tunnel_host="${ADSOPS_TUNNEL_HOSTS[$endpoint]}"
+
+    if [ -z "$tunnel_host" ]; then
+        echo -e "${_RED}Error: No tunnel configured for endpoint: $endpoint${_NC}" >&2
+        return 1
+    fi
+
+    # Determine tunnel type based on endpoint
+    local direct_ep="${ADSOPS_ENDPOINTS[$endpoint]}"
+    local port="${direct_ep#*:}"
+
+    if [ "$port" = "22" ]; then
+        # SSH tunnel
+        echo -e "${_CYAN}Starting SSH tunnel to $tunnel_host...${_NC}"
+        echo -e "${_YELLOW}Run: cloudflared access ssh --hostname $tunnel_host${_NC}"
+    else
+        # TCP tunnel (database, etc)
+        if [ "$local_port" = "0" ]; then
+            local_port=$((port + 10000))
+        fi
+        echo -e "${_CYAN}Starting TCP tunnel to $tunnel_host on local port $local_port...${_NC}"
+        echo -e "${_YELLOW}Run: cloudflared access tcp --hostname $tunnel_host --url localhost:$local_port${_NC}"
+    fi
+}
+
+# Main function when run directly
+main() {
+    local command="${1:-context}"
+    shift || true
+
+    case "$command" in
+        context|detect)
+            adsops_detect_context
+            adsops_show_context
+            ;;
+        env)
+            adsops_load_env
+            env | grep -E '^(ADSOPS_|INVENTORY_|DB_|CLOUDFLARE_|OCI_|SSH_)' | sort
+            ;;
+        endpoint)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-context endpoint <endpoint_name> [direct|tunnel|auto]"
+                echo ""
+                echo "Available endpoints:"
+                for ep in "${!ADSOPS_ENDPOINTS[@]}"; do
+                    echo "  $ep"
+                done
+                exit 1
+            fi
+            adsops_detect_context
+            adsops_get_endpoint "$@"
+            ;;
+        tunnel)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-context tunnel <endpoint_name> [local_port]"
+                exit 1
+            fi
+            adsops_detect_context
+            adsops_start_tunnel "$@"
+            ;;
+        need-tunnel)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-context need-tunnel <endpoint_name>"
+                exit 1
+            fi
+            adsops_detect_context
+            adsops_need_tunnel "$1"
+            ;;
+        db)
+            if [ -z "$1" ]; then
+                echo "Usage: adsops-context db <inventory|apiproxy|keycloak>"
+                exit 1
+            fi
+            adsops_detect_context
+            adsops_get_db_params "$1"
+            ;;
+        help|--help|-h)
+            cat <<EOF
+adsops-context - Context-aware environment detection and configuration
+
+Usage: adsops-context <command> [options]
+
+Commands:
+  context, detect    Show execution context and endpoint accessibility
+  env                Load and display environment configuration
+  endpoint <name>    Get appropriate host:port for an endpoint
+  tunnel <name>      Show command to start tunnel for an endpoint
+  need-tunnel <name> Check if endpoint needs tunnel (true/false)
+  db <type>          Get database connection parameters
+  help               Show this help message
+
+Endpoint Names:
+  inventory_db       AdsOps inventory database
+  apiproxy_db        API Proxy local database
+  keycloak_db        Keycloak PostgreSQL database
+  keycloak_ssh       SSH to Keycloak server
+  managedcrypto_ssh  SSH to managedcrypto server
+  darkapi_ssh        SSH to darkapi server
+
+Contexts:
+  host               Running on host machine
+  docker             Running in Docker container
+  kubernetes         Running in Kubernetes pod
+
+Network Contexts:
+  oci-internal       Can reach OCI resources directly
+  external           Needs Cloudflare tunnel for OCI resources
+
+Environment Variables:
+  ADSOPS_DIR         Base directory (default: /usr/local/sshkeys)
+  ADSOPS_CONFIG_DIR  Config directory (default: ~/.adsops/config)
+
+Examples:
+  adsops-context                    # Show context info
+  adsops-context endpoint keycloak_db
+  adsops-context tunnel keycloak_db
+  adsops-context db inventory
+EOF
+            ;;
+        *)
+            echo "Unknown command: $command"
+            echo "Run 'adsops-context help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
+# Run main if executed directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
